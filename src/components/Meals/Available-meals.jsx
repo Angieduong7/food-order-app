@@ -1,46 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../IU/Card';
 import MealItem from '../MealItem/MealItem';
 import './Available-meals.style.scss';
 
-const MEALS = [
-  {
-    id: 'm1',
-    name: 'Sushi',
-    description: 'Finest fish and veggies',
-    price: 22.99,
-  },
-  {
-    id: 'm2',
-    name: 'Schnitzel',
-    description: 'A german specialty!',
-    price: 16.5,
-  },
-  {
-    id: 'm3',
-    name: 'Barbecue Burger',
-    description: 'American, raw, meaty',
-    price: 12.99,
-  },
-  {
-    id: 'm4',
-    name: 'Green Bowl',
-    description: 'Healthy...and green...',
-    price: 18.99,
-  },
-];
-
 const AvailableMeals = () => {
+  const [meals, setMeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState();
+
+  useEffect(() => {
+    const fetchMeals = async () => {
+      const response = await fetch(
+        'https://food-order-app-3cfbb-default-rtdb.asia-southeast1.firebasedatabase.app/meals.jso'
+      );
+
+      if (!response.ok) {
+        throw new Error('Error, try again!');
+      }
+
+      const responseData = await response.json();
+
+      const mealsLoaded = [];
+
+      for (const key in responseData) {
+        mealsLoaded.push({
+          id: key,
+          name: responseData[key].name,
+          description: responseData[key].description,
+          price: responseData[key].price,
+        });
+      }
+
+      setMeals(mealsLoaded);
+      setIsLoading(false);
+    };
+
+    fetchMeals().catch((error) => {
+      setIsLoading(false);
+      setError(error.message);
+    });
+  }, []);
+
+  if (isLoading) {
+    return <div className='loader'></div>;
+  }
+
+  if (error) {
+    return <div className='errorMessage'>{error}</div>;
+  }
   return (
-    <section className='meals'>
-      <Card>
-        <ul>
-          {MEALS.map(({ id, ...otherProps }) => {
-            return <MealItem id={id} key={id} {...otherProps} />;
-          })}
-        </ul>
-      </Card>
-    </section>
+    <div>
+      <section className='meals'>
+        <Card>
+          <ul>
+            {meals.map(({ id, ...otherProps }) => {
+              return <MealItem id={id} key={id} {...otherProps} />;
+            })}
+          </ul>
+        </Card>
+      </section>
+    </div>
   );
 };
 
