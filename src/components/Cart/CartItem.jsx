@@ -13,6 +13,7 @@ const CartItem = ({ price, name, amount, onRemove, onAdd }) => {
           <span className='cart-amount'>x {amount}</span>
         </div>
       </div>
+
       <div className='cart-actions'>
         <button onClick={onRemove}>-</button>
         <button onClick={onAdd}>+</button>
